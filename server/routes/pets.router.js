@@ -27,13 +27,22 @@ router.get('/', rejectUnauthenticated , (req, res) => {
 });
 
 // This route *should* add a pet for the logged in user
-router.post('/', (req, res) => {
-    console.log('/pet POST route');
-    console.log(req.body);
-    console.log('is authenticated?', req.isAuthenticated());
-    console.log('user', req.user);
-    res.sendStatus(200);
-    
+router.post('/', rejectUnauthenticated, (req, res) => {
+
+    const queryText = `INSERT INTO "pets" (name, user_id)
+    VALUES ($1, $2);`;
+
+    pool.query(queryText, [req.body.name, req.user.id])
+    .then(result => {
+        res.sendStatus(201)
+    }).catch(error => {
+        res.sendStatus(500)
+    })
+    // console.log('/pet POST route');
+    // console.log(req.body);
+    // console.log('is authenticated?', req.isAuthenticated());
+    // console.log('user', req.user);
+    // res.sendStatus(200);
 });
 
 module.exports = router;

@@ -1,34 +1,35 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 import {
   HashRouter as Router,
   Redirect,
   Route,
   Switch,
-} from 'react-router-dom';
+} from "react-router-dom";
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from "react-redux";
 
-import Nav from '../Nav/Nav';
-import Footer from '../Footer/Footer';
+import Nav from "../Nav/Nav";
+import Footer from "../Footer/Footer";
 
-import ProtectedRoute from '../ProtectedRoute/ProtectedRoute';
+import ProtectedRoute from "../ProtectedRoute/ProtectedRoute";
 
-import AboutPage from '../AboutPage/AboutPage';
-import UserPage from '../UserPage/UserPage';
-import InfoPage from '../InfoPage/InfoPage';
-import LandingPage from '../LandingPage/LandingPage';
-import LoginPage from '../LoginPage/LoginPage';
-import RegisterPage from '../RegisterPage/RegisterPage';
+import AboutPage from "../AboutPage/AboutPage";
+import UserPage from "../UserPage/UserPage";
+import InfoPage from "../InfoPage/InfoPage";
+import LandingPage from "../LandingPage/LandingPage";
+import LoginPage from "../LoginPage/LoginPage";
+import RegisterPage from "../RegisterPage/RegisterPage";
 
-import './App.css';
+import "./App.css";
+import AdminPage from "../AdminPage/AdminPage";
 
 function App() {
   const dispatch = useDispatch();
 
-  const user = useSelector(store => store.user);
+  const user = useSelector((store) => store.user);
 
   useEffect(() => {
-    dispatch({ type: 'FETCH_USER' });
+    dispatch({ type: "FETCH_USER" });
   }, [dispatch]);
 
   return (
@@ -40,6 +41,7 @@ function App() {
           <Redirect exact from="/" to="/home" />
 
           {/* Visiting localhost:3000/about will show the about page. */}
+          {/* ABOUT  */}
           <Route
             // shows AboutPage at all times (logged in or not)
             exact
@@ -48,66 +50,77 @@ function App() {
             <AboutPage />
           </Route>
 
+          {/* PROTECTED ROUTE */}
           {/* For protected routes, the view could show one of several things on the same route.
             Visiting localhost:3000/user will show the UserPage if the user is logged in.
             If the user is not logged in, the ProtectedRoute will show the LoginPage (component).
             Even though it seems like they are different pages, the user is always on localhost:3000/user */}
+          {/* USER PAGE */}
           <ProtectedRoute
-            // logged in shows UserPage else shows LoginPage
+            // logged in shows User Page, else shows Login Page
             exact
             path="/user"
           >
             <UserPage />
           </ProtectedRoute>
 
+          {/* ADMIN PAGE */}
           <ProtectedRoute
-            // logged in shows InfoPage else shows LoginPage
+            // logged in shows Admin Page
+            exact
+            path="/admin"
+          >
+            {user.access_level >= 10 ? (
+               // If user is logged in and have access level of 10 or higher, 
+               // show Admin Page
+              <AdminPage />
+            ) : (
+              // Otherwise, redirect to User Page
+              <Redirect to="/user" />
+            )}
+          </ProtectedRoute>
+
+          {/* LOGIN PAGE */}
+          <ProtectedRoute
+            // logged in shows Info Page, else shows Login Page
             exact
             path="/info"
           >
             <InfoPage />
           </ProtectedRoute>
-
-          <Route
-            exact
-            path="/login"
-          >
-            {user.id ?
-              // If the user is already logged in, 
+          {/* LOGGED IN -> USER PAGE */}
+          <Route exact path="/login">
+            {user.id ? (
+              // If the user is already logged in,
               // redirect to the /user page
               <Redirect to="/user" />
-              :
-              // Otherwise, show the login page
+            ) : (
+              // Otherwise, show the Login page
               <LoginPage />
-            }
+            )}
           </Route>
 
-          <Route
-            exact
-            path="/registration"
-          >
-            {user.id ?
-              // If the user is already logged in, 
+          {/* SIGNUP PAGE */}
+          <Route exact path="/registration">
+            {user.id ? (
+              // If the user is already logged in,
               // redirect them to the /user page
               <Redirect to="/user" />
-              :
+            ) : (
               // Otherwise, show the registration page
               <RegisterPage />
-            }
+            )}
           </Route>
-
-          <Route
-            exact
-            path="/home"
-          >
-            {user.id ?
-              // If the user is already logged in, 
+          {/* LOGGED IN -> USER PAGE */}
+          <Route exact path="/home">
+            {user.id ? (
+              // If the user is already logged in,
               // redirect them to the /user page
               <Redirect to="/user" />
-              :
+            ) : (
               // Otherwise, show the Landing page
               <LandingPage />
-            }
+            )}
           </Route>
 
           {/* If none of the other routes matched, we will show a 404. */}
